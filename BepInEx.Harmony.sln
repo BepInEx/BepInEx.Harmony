@@ -5,10 +5,9 @@ VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BepInEx.Harmony", "BepInEx.Harmony\BepInEx.Harmony.csproj", "{54161CFE-FF42-4DDE-B161-3A49545DB5CD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{82C9B035-52C5-468E-B252-F2262BDA2EDE}"
-	ProjectSection(SolutionItems) = preProject
-		lib\0Harmony.dll = lib\0Harmony.dll
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Submodules", "Submodules", "{A768CF36-D16C-46AB-B398-55B7942384B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Harmony", "submodules\Harmony\Harmony\Harmony.csproj", "{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +19,16 @@ Global
 		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F} = {A768CF36-D16C-46AB-B398-55B7942384B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89EE69F7-A706-482D-843E-761719BBE2EF}

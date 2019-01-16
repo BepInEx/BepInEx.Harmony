@@ -23,6 +23,16 @@ namespace BepInEx.Harmony
 
 					var info = HarmonyMethod.Merge(parentMethodInfos);
 
+					if (attributes.Any(x => x is ParameterByRefAttribute))
+					{
+						var byRefAttribute = (ParameterByRefAttribute)attributes.First(x => x is ParameterByRefAttribute);
+
+						foreach (int index in byRefAttribute.ParameterIndices)
+						{
+							info.argumentTypes[index] = info.argumentTypes[index].MakeByRefType();
+						}
+					}
+
 					HarmonyMethod prefix = null;
 					HarmonyMethod transpiler = null;
 					HarmonyMethod postfix = null;
