@@ -6,10 +6,21 @@ using Harmony;
 
 namespace BepInEx.Harmony
 {
+	/// <summary>
+	/// A wrapper for Harmony based operations.
+	/// </summary>
     public class HarmonyWrapper
     {
+		/// <summary>
+		/// The HarmonyInstance that is used when none is specified.
+		/// </summary>
 		public static HarmonyInstance DefaultInstance { get; } = HarmonyInstance.Create("bepinex.default");
 
+		/// <summary>
+		/// Applies all patches specified in the type.
+		/// </summary>
+		/// <param name="type">The type to scan.</param>
+		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
 		public static void PatchAll(Type type, HarmonyInstance harmonyInstance = null)
 		{
 			var instance = harmonyInstance ?? DefaultInstance;
@@ -57,12 +68,21 @@ namespace BepInEx.Harmony
 			});
 		}
 
+		/// <summary>
+		/// Applies all patches specified in the assembly.
+		/// </summary>
+		/// <param name="assembly">The assembly to scan.</param>
+		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
 		public static void PatchAll(Assembly assembly, HarmonyInstance harmonyInstance = null)
 		{
 			foreach (var type in assembly.GetTypes())
 				PatchAll(type, harmonyInstance);
 		}
 
+		/// <summary>
+		/// Applies all patches specified in the calling assembly.
+		/// </summary>
+		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
 		public static void PatchAll(HarmonyInstance harmonyInstance = null)
 		{
 			PatchAll(Assembly.GetCallingAssembly(), harmonyInstance);

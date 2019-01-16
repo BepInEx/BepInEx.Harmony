@@ -11,16 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Harmony", "submodules\Harmo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54161CFE-FF42-4DDE-B161-3A49545DB5CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5ACFB29B-8FC4-4DE4-A8DD-A1C460CCB81F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
