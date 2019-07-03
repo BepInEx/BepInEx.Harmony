@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="EmitDelegate.cs" />
+    <Compile Include="HarmonyExtensions.cs" />
     <Compile Include="HarmonyWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
