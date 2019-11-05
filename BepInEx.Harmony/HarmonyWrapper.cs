@@ -161,7 +161,22 @@ namespace BepInEx.Harmony
 									  .GetSetMethod(true);
 
 				case MethodType.Constructor:
-					return AccessTools.DeclaredConstructor(attribute.declaringType, attribute.argumentTypes);
+					return AccessTools.GetDeclaredConstructors(attribute.declaringType)
+									  .FirstOrDefault((ConstructorInfo c) =>
+									  {
+									  	if (c.IsStatic)
+									  	{
+									  		return false;
+									  	}
+									  	var parameters = c.GetParameters();
+									  	if (attribute.argumentTypes == null && parameters.Length == 0)
+										{
+											return true;
+										}
+									  	return parameters
+									  		.Select((p) => p.ParameterType)
+									  		.SequenceEqual(attribute.argumentTypes);
+									  });
 
 				case MethodType.StaticConstructor:
 					return AccessTools.GetDeclaredConstructors(attribute.declaringType)
