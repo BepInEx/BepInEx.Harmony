@@ -133,7 +133,7 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="harmonyInstanceId">The ID for the Harmony instance to create, which will be used.</param>
 		public static HarmonyLib.Harmony PatchAll(string harmonyInstanceId)
-			=> PatchAll(new HarmonyLib.Harmony(harmonyInstanceId));
+			=> PatchAll(Assembly.GetCallingAssembly(), harmonyInstanceId);
 
 		
 		private static MethodBase GetOriginalMethod(HarmonyMethod attribute)
