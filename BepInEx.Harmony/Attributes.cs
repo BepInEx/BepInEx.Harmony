@@ -6,17 +6,16 @@ namespace BepInEx.Harmony
 	/// Specifies the indices of parameters that are ByRef.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
-	public class ParameterByRefAttribute : Attribute
+	public class ParameterByRefAttribute : HarmonyLib.ParameterByRefAttribute
 	{
 		/// <summary>
 		/// The indices of parameters that are ByRef.
 		/// </summary>
-		public int[] ParameterIndices { get; }
+		public new int[] ParameterIndices => base.ParameterIndices;
 
 		/// <param name="parameterIndices">The indices of parameters that are ByRef.</param>
-		public ParameterByRefAttribute(params int[] parameterIndices)
+		public ParameterByRefAttribute(params int[] parameterIndices) : base(parameterIndices)
 		{
-			ParameterIndices = parameterIndices;
 		}
 	}
 }

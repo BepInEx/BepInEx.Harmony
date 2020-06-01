@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 
@@ -9,7 +7,7 @@ namespace BepInEx.Harmony
 	/// <summary>
 	/// A wrapper for Harmony based operations.
 	/// </summary>
-	public partial class HarmonyWrapper
+	public class HarmonyWrapper
 	{
 		/// <summary>
 		/// Applies all patches specified in the type.
@@ -19,72 +17,9 @@ namespace BepInEx.Harmony
 		public static HarmonyLib.Harmony PatchAll(Type type, HarmonyLib.Harmony harmonyInstance = null)
 		{
 			var instance = harmonyInstance ?? new HarmonyLib.Harmony($"harmonywrapper-auto-{Guid.NewGuid()}");
-
-			type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).Do(method =>
-			{
-				var patchAttributeMethods = HarmonyMethodExtensions.GetFromMethod(method);
-				if (patchAttributeMethods != null && patchAttributeMethods.Any())
-				{
-					var attributes = method.GetCustomAttributes(true);
-
-					var combinedInfo = HarmonyMethod.Merge(patchAttributeMethods);
-
-					if (attributes.Any(x => x is ParameterByRefAttribute))
-					{
-						var byRefAttribute = (ParameterByRefAttribute)attributes.First(x => x is ParameterByRefAttribute);
-
-						foreach (int index in byRefAttribute.ParameterIndices)
-						{
-							combinedInfo.argumentTypes[index] = combinedInfo.argumentTypes[index].MakeByRefType();
-						}
-					}
-
-					HarmonyMethod prefix = null;
-					HarmonyMethod transpiler = null;
-					HarmonyMethod postfix = null;
-
-					if (attributes.Any(x => x is HarmonyPrefix))
-						prefix = new HarmonyMethod(method);
-
-					if (attributes.Any(x => x is HarmonyTranspiler))
-						transpiler = new HarmonyMethod(method);
-
-					if (attributes.Any(x => x is HarmonyPostfix))
-						postfix = new HarmonyMethod(method);
-
-
-					List<HarmonyMethod> completeMethods = patchAttributeMethods.Where(x => x.declaringType != null && x.methodName != null).ToList();
-
-					if (patchAttributeMethods.All(x => x.declaringType != combinedInfo.declaringType && x.methodName != combinedInfo.methodName))
-						completeMethods.Add(combinedInfo);
-
-					List<MethodBase> originalMethods = new List<MethodBase>();
-
-					foreach (var methodToPatch in completeMethods)
-					{
-						if (!methodToPatch.methodType.HasValue)
-							methodToPatch.methodType = MethodType.Normal;
-
-						var originalMethod = GetOriginalMethod(methodToPatch);
-
-						if (originalMethod == null)
-							throw new ArgumentException($"Null method for attribute: \n" +
-														$"Type={methodToPatch.declaringType.FullName ?? "<null>"}\n" +
-														$"Name={methodToPatch.methodName ?? "<null>"}\n" +
-														$"MethodType={(methodToPatch.methodType.HasValue ? methodToPatch.methodType.Value.ToString() : "<null>")}\n" +
-														$"Args={(methodToPatch.argumentTypes == null ? "<null>" : string.Join(",", methodToPatch.argumentTypes.Select(x => x.FullName).ToArray()))}");
-
-						originalMethods.Add(originalMethod);
-					}
-
-					var processor = new PatchProcessor(instance, originalMethods, prefix, postfix, transpiler);
-					processor.Patch();
-				}
-			});
-
-			return instance;
+			instance.PatchAll(type);
+				return instance;
 		}
-
 
 		/// <summary>
 		/// Applies all patches specified in the type.
@@ -133,42 +68,33 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="harmonyInstanceId">The ID for the Harmony instance to create, which will be used.</param>
 		public static HarmonyLib.Harmony PatchAll(string harmonyInstanceId)
-			=> PatchAll(new HarmonyLib.Harmony(harmonyInstanceId));
+			=> PatchAll(Assembly.GetCallingAssembly(), harmonyInstanceId);
 
-		
-		private static MethodBase GetOriginalMethod(HarmonyMethod attribute)
+		/// <summary>
+		/// Returns an instruction to call the specified delegate.
+		/// </summary>
+		/// <typeparam name="T">The delegate type to emit.</typeparam>
+		/// <param name="action">The delegate to emit.</param>
+		/// <returns>The instruction to </returns>
+		public static CodeInstruction EmitDelegate<T>(T action) where T : Delegate
 		{
-			if (attribute.declaringType == null)
-				return null;
+			return Transpilers.EmitDelegate(action);
+		}
+	}
 
-			switch (attribute.methodType)
-			{
-				case MethodType.Normal:
-					if (attribute.methodName == null)
-						return null;
-					return AccessTools.DeclaredMethod(attribute.declaringType, attribute.methodName, attribute.argumentTypes);
-
-				case MethodType.Getter:
-					if (attribute.methodName == null)
-						return null;
-					return AccessTools.DeclaredProperty(attribute.declaringType, attribute.methodName)
-									  .GetGetMethod(true);
-
-				case MethodType.Setter:
-					if (attribute.methodName == null)
-						return null;
-					return AccessTools.DeclaredProperty(attribute.declaringType, attribute.methodName)
-									  .GetSetMethod(true);
-
-				case MethodType.Constructor:
-					return AccessTools.DeclaredConstructor(attribute.declaringType, attribute.argumentTypes);
-
-				case MethodType.StaticConstructor:
-					return AccessTools.GetDeclaredConstructors(attribute.declaringType)
-									  .FirstOrDefault(c => c.IsStatic);
-			}
-
-			return null;
+	/// <summary>
+	/// An extension class for Harmony based operations.
+	/// </summary>
+	public static class HarmonyExtensions
+	{
+		/// <summary>
+		/// Applies all patches specified in the type.
+		/// </summary>
+		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
+		/// <param name="type">The type to scan.</param>
+		public static void PatchAll(this HarmonyLib.Harmony harmonyInstance, Type type)
+		{
+			HarmonyWrapper.PatchAll(type, harmonyInstance);
 		}
 	}
 }
