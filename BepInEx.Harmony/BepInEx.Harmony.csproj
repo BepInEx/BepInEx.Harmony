@@ -36,20 +36,33 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\HarmonyX\Harmony\bin\Release\net35\0Harmony.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\HarmonyX.2.0.2\lib\net35\0Harmony.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour, Version=20.5.21.5, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\MonoMod.RuntimeDetour.20.5.21.5\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils, Version=20.5.21.5, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\MonoMod.Utils.20.5.21.5\lib\net35\MonoMod.Utils.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
-    <Compile Include="EmitDelegate.cs" />
     <Compile Include="HarmonyExtensions.cs" />
     <Compile Include="HarmonyWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
