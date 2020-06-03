@@ -14,11 +14,13 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="type">The type to scan.</param>
 		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
+		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll or HarmonyLib.Harmony.PatchAll")]
 		public static HarmonyLib.Harmony PatchAll(Type type, HarmonyLib.Harmony harmonyInstance = null)
 		{
-			var instance = harmonyInstance ?? new HarmonyLib.Harmony($"harmonywrapper-auto-{Guid.NewGuid()}");
-			instance.PatchAll(type);
-				return instance;
+			if (harmonyInstance == null)
+				return HarmonyLib.Harmony.CreateAndPatchAll(type);
+			harmonyInstance.PatchAll(type);
+			return harmonyInstance;
 		}
 
 		/// <summary>
@@ -26,8 +28,9 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="type">The type to scan.</param>
 		/// <param name="harmonyInstanceId">The ID for the Harmony instance to create, which will be used.</param>
+		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll")]
 		public static HarmonyLib.Harmony PatchAll(Type type, string harmonyInstanceId)
-			=> PatchAll(type, new HarmonyLib.Harmony(harmonyInstanceId));
+			=> HarmonyLib.Harmony.CreateAndPatchAll(type, harmonyInstanceId);
 
 
 		/// <summary>
@@ -35,14 +38,13 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="assembly">The assembly to scan.</param>
 		/// <param name="harmonyInstance">The HarmonyInstance to use.</param>
+		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll or HarmonyLib.Harmony.PatchAll")]
 		public static HarmonyLib.Harmony PatchAll(Assembly assembly, HarmonyLib.Harmony harmonyInstance = null)
 		{
-			var instance = harmonyInstance ?? new HarmonyLib.Harmony($"harmonywrapper-auto-{Guid.NewGuid()}");
-
-			foreach (var type in assembly.GetTypes())
-				PatchAll(type, instance);
-
-			return instance;
+			if(harmonyInstance == null)
+				return HarmonyLib.Harmony.CreateAndPatchAll(assembly);
+			harmonyInstance.PatchAll(assembly);
+			return harmonyInstance;
 		}
 
 
@@ -51,14 +53,16 @@ namespace BepInEx.Harmony
 		/// </summary>
 		/// <param name="assembly">The assembly to scan.</param>
 		/// <param name="harmonyInstanceId">The ID for the Harmony instance to create, which will be used.</param>
+		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll")]
 		public static HarmonyLib.Harmony PatchAll(Assembly assembly, string harmonyInstanceId)
-			=> PatchAll(assembly, new HarmonyLib.Harmony(harmonyInstanceId));
+			=> HarmonyLib.Harmony.CreateAndPatchAll(assembly, harmonyInstanceId);
 
 
 		/// <summary>
 		/// Applies all patches specified in the calling assembly.
 		/// </summary>
 		/// <param name="harmonyInstance">The Harmony instance to use.</param>
+		[Obsolete("Use HarmonyLib.Harmony.PatchAll with no arguments")]
 		public static HarmonyLib.Harmony PatchAll(HarmonyLib.Harmony harmonyInstance = null)
 			=> PatchAll(Assembly.GetCallingAssembly(), harmonyInstance);
 
@@ -67,6 +71,7 @@ namespace BepInEx.Harmony
 		/// Applies all patches specified in the calling assembly.
 		/// </summary>
 		/// <param name="harmonyInstanceId">The ID for the Harmony instance to create, which will be used.</param>
+		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), ...)")]
 		public static HarmonyLib.Harmony PatchAll(string harmonyInstanceId)
 			=> PatchAll(Assembly.GetCallingAssembly(), harmonyInstanceId);
 
@@ -76,6 +81,7 @@ namespace BepInEx.Harmony
 		/// <typeparam name="T">The delegate type to emit.</typeparam>
 		/// <param name="action">The delegate to emit.</param>
 		/// <returns>The instruction to </returns>
+		[Obsolete("Use HarmonyLib.Transpilers.EmitDelegate instead")]
 		public static CodeInstruction EmitDelegate<T>(T action) where T : Delegate
 		{
 			return Transpilers.EmitDelegate(action);
