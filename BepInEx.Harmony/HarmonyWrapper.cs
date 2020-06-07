@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 
@@ -32,7 +33,6 @@ namespace BepInEx.Harmony
 		public static HarmonyLib.Harmony PatchAll(Type type, string harmonyInstanceId)
 			=> HarmonyLib.Harmony.CreateAndPatchAll(type, harmonyInstanceId);
 
-
 		/// <summary>
 		/// Applies all patches specified in the assembly.
 		/// </summary>
@@ -41,12 +41,8 @@ namespace BepInEx.Harmony
 		[Obsolete("Use HarmonyLib.Harmony.CreateAndPatchAll or HarmonyLib.Harmony.PatchAll")]
 		public static HarmonyLib.Harmony PatchAll(Assembly assembly, HarmonyLib.Harmony harmonyInstance = null)
 		{
-			if(harmonyInstance == null)
-				return HarmonyLib.Harmony.CreateAndPatchAll(assembly);
-			harmonyInstance.PatchAll(assembly);
-			return harmonyInstance;
+			return assembly.GetTypes().Aggregate(harmonyInstance, (current, type) => PatchAll(type, current));
 		}
-
 
 		/// <summary>
 		/// Applies all patches specified in the assembly.
@@ -57,7 +53,6 @@ namespace BepInEx.Harmony
 		public static HarmonyLib.Harmony PatchAll(Assembly assembly, string harmonyInstanceId)
 			=> HarmonyLib.Harmony.CreateAndPatchAll(assembly, harmonyInstanceId);
 
-
 		/// <summary>
 		/// Applies all patches specified in the calling assembly.
 		/// </summary>
@@ -65,7 +60,6 @@ namespace BepInEx.Harmony
 		[Obsolete("Use HarmonyLib.Harmony.PatchAll with no arguments")]
 		public static HarmonyLib.Harmony PatchAll(HarmonyLib.Harmony harmonyInstance = null)
 			=> PatchAll(Assembly.GetCallingAssembly(), harmonyInstance);
-
 
 		/// <summary>
 		/// Applies all patches specified in the calling assembly.
