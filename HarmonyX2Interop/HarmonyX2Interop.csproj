@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>HarmonyX2Interop</RootNamespace>
+        <AssemblyName>HarmonyX2Interop</AssemblyName>
+        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE;NET35</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE;NET35</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+          <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+          <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Mdb.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+          <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Pdb.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+          <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net35\Mono.Cecil.Rocks.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="MonoMod.RuntimeDetour, Version=20.8.3.5, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\MonoMod.RuntimeDetour.20.8.3.5\lib\net35\MonoMod.RuntimeDetour.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="MonoMod.Utils, Version=20.8.3.5, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\MonoMod.Utils.20.8.3.5\lib\net35\MonoMod.Utils.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Attributes.cs" />
+        <Compile Include="Exceptions.cs" />
+        <Compile Include="GlobalSuppressions.cs" />
+        <Compile Include="Harmony.cs" />
+        <Compile Include="HarmonyMethod.cs" />
+        <Compile Include="Internal\AccessCache.cs" />
+        <Compile Include="Internal\EmitterExtensions.cs" />
+        <Compile Include="Internal\GlobalPatchState.cs" />
+        <Compile Include="Internal\ILManipulator.cs" />
+        <Compile Include="Internal\Legacy.cs" />
+        <Compile Include="Patching\Patch.cs" />
+        <Compile Include="Patching\Patches.cs" />
+        <Compile Include="Patching\PatchProcessor.cs" />
+        <Compile Include="Patching\ReversePatcher.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Tools\CodeMatcher.cs" />
+        <Compile Include="Tools\Extensions\CodeInstructionExtensions.cs" />
+        <Compile Include="Tools\Extensions\CollectionExtensions.cs" />
+        <Compile Include="Tools\Extensions\GeneralExtensions.cs" />
+        <Compile Include="Tools\Extensions\SymbolExtensions.cs" />
+        <Compile Include="Tools\FileLog.cs" />
+        <Compile Include="Tools\JetBrains.Annotations.cs" />
+        <Compile Include="Tools\Logger.cs" />
+        <Compile Include="Tools\Reflection\AccessTools.cs" />
+        <Compile Include="Tools\Reflection\DelegateTypeFactory.cs" />
+        <Compile Include="Tools\Reflection\FastAccess.cs" />
+        <Compile Include="Tools\Reflection\MethodInvoker.cs" />
+        <Compile Include="Tools\Reflection\Traverse.cs" />
+        <Compile Include="Transpiling\CodeInstruction.cs" />
+        <Compile Include="Transpiling\ExceptionBlock.cs" />
+        <Compile Include="Transpiling\Transpilers.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\HarmonyXInterop\HarmonyXInterop.csproj">
+        <Project>{160f7fe0-288d-435c-9e7e-497d3e0de3a6}</Project>
+        <Name>HarmonyXInterop</Name>
+      </ProjectReference>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>

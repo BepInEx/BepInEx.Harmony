@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BepInEx.Harmony", "BepInEx.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BepInEx.Harmony.Tests", "BepInEx.Harmony.Tests\BepInEx.Harmony.Tests.csproj", "{16F08747-D5B4-4B61-B29B-99489E361A43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonyXInterop", "HarmonyXInterop\HarmonyXInterop.csproj", "{160F7FE0-288D-435C-9E7E-497D3E0DE3A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonyX2Interop", "HarmonyX2Interop\HarmonyX2Interop.csproj", "{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{16F08747-D5B4-4B61-B29B-99489E361A43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16F08747-D5B4-4B61-B29B-99489E361A43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16F08747-D5B4-4B61-B29B-99489E361A43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{160F7FE0-288D-435C-9E7E-497D3E0DE3A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{160F7FE0-288D-435C-9E7E-497D3E0DE3A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{160F7FE0-288D-435C-9E7E-497D3E0DE3A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{160F7FE0-288D-435C-9E7E-497D3E0DE3A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
