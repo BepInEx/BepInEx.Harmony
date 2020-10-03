@@ -39,10 +39,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\HarmonyX.2.0.2\lib\net40\0Harmony.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>
@@ -88,6 +84,10 @@
     <ProjectReference Include="..\BepInEx.Harmony\BepInEx.Harmony.csproj">
       <Project>{54161CFE-FF42-4DDE-B161-3A49545DB5CD}</Project>
       <Name>BepInEx.Harmony</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HarmonyX2Interop\HarmonyX2Interop.csproj">
+      <Project>{69f6541d-a0f5-419d-b0ee-f5017f1d34f3}</Project>
+      <Name>HarmonyX2Interop</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
