@@ -84,4 +84,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="CopyToBin" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetDir)0Harmony20.dll;$(TargetDir)BepInEx.Harmony.dll" DestinationFolder="$(SolutionDir)bin" />
+  </Target>
 </Project>
