@@ -118,8 +118,8 @@ namespace HarmonyXInterop
             }
         }
 
-        private static Action<MethodBase, PatchInfo> UpdateWrapper =
-            AccessTools.MethodDelegate<Action<MethodBase, PatchInfo>>(
+        private static Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
+            AccessTools.MethodDelegate<Func<MethodBase, PatchInfo, MethodInfo>>(
                 AccessTools.Method(typeof(HarmonyManipulator).Assembly.GetType("HarmonyLib.PatchFunctions"),
                     "UpdateWrapper"));
 
