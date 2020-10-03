@@ -48,6 +48,7 @@ namespace HarmonyXInterop
     public static class HarmonyInterop
     {
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
+        private static readonly Dictionary<Version, Assembly> AssemblyCache = new Dictionary<Version, Assembly>();
 
         public static void Initialize()
         {
@@ -77,6 +78,19 @@ namespace HarmonyXInterop
             }
         }
 
+        // In some cases interop lib name is not 0Harmony (e.g. build purposes)
+        // In this case we normalize assembly names so that they are always resolved
+        // properly
+        private static byte[] FixupHarmonyAssemlbyName(string path)
+        {
+            using var ms = new MemoryStream();
+            using var ad = AssemblyDefinition.ReadAssembly(path);
+            ad.Name.Name = "0Harmony";
+            ad.MainModule.Name = "0Harmony.dll";
+            ad.Write(ms);
+            return ms.ToArray();
+        }
+        
         private static Assembly ResolveHarmonyDependency(object sender, ResolveEventArgs args)
         {
             if (!TryParseAssemblyName(args.Name, out var name))
@@ -89,9 +103,14 @@ namespace HarmonyXInterop
             if (assToLoad.Value == null)
                 return null;
 
+            if (AssemblyCache.TryGetValue(assToLoad.Key, out var assembly))
+                return assembly;
+
             try
             {
-                return Assembly.LoadFile(assToLoad.Value);
+                assembly = Assembly.Load(FixupHarmonyAssemlbyName(assToLoad.Value));
+                AssemblyCache[assToLoad.Key] = assembly;
+                return assembly;
             }
             catch (Exception)
             {
