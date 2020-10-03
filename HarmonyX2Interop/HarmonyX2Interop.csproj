@@ -7,8 +7,8 @@
         <ProjectGuid>{69F6541D-A0F5-419D-B0EE-F5017F1D34F3}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>HarmonyX2Interop</RootNamespace>
-        <AssemblyName>HarmonyX2Interop</AssemblyName>
+        <RootNamespace>HarmonyLib</RootNamespace>
+        <AssemblyName>0Harmony20</AssemblyName>
         <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
