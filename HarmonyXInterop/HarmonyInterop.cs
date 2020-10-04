@@ -130,7 +130,14 @@ namespace HarmonyXInterop
             {
                 pInfo.prefixes = Sync(info.prefixes, pInfo.prefixes);
                 pInfo.postfixes = Sync(info.postfixes, pInfo.postfixes);
-                pInfo.transpilers = Sync(info.transpilers, pInfo.transpilers);
+                pInfo.transpilers = Sync(info.transpilers.Select(p => new PatchMethod
+                {
+                    after = p.after,
+                    before = p.before,
+                    method = TranspilerInterop.WrapInterop(p.method),
+                    owner = p.owner,
+                    priority = p.priority
+                }).ToArray(), pInfo.transpilers);
                 pInfo.finalizers = Sync(info.finalizers, pInfo.finalizers);
             }
 
