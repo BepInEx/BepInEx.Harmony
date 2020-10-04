@@ -25,8 +25,8 @@ namespace HarmonyXInterop
 
             foreach (var file in Directory.GetFiles(curDir, "0Harmony*.dll", SearchOption.AllDirectories))
             {
-                using var ass = AssemblyDefinition.ReadAssembly(file);
-                Assemblies.Add(ass.Name.Version, file);
+                using (var ass = AssemblyDefinition.ReadAssembly(file))
+                    Assemblies.Add(ass.Name.Version, file);
             }
 
             AppDomain.CurrentDomain.AssemblyResolve += ResolveHarmonyDependency;
@@ -52,12 +52,14 @@ namespace HarmonyXInterop
         // properly
         private static byte[] FixupHarmonyAssemblyName(string path)
         {
-            using var ms = new MemoryStream();
-            using var ad = AssemblyDefinition.ReadAssembly(path);
-            ad.Name.Name = "0Harmony";
-            ad.MainModule.Name = "0Harmony.dll";
-            ad.Write(ms);
-            return ms.ToArray();
+            using (var ms = new MemoryStream())
+            using (var ad = AssemblyDefinition.ReadAssembly(path))
+            {
+                ad.Name.Name = "0Harmony";
+                ad.MainModule.Name = "0Harmony.dll";
+                ad.Write(ms);
+                return ms.ToArray();
+            }
         }
 
         private static Assembly ResolveHarmonyDependency(object sender, ResolveEventArgs args)

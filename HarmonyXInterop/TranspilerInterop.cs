@@ -72,32 +72,33 @@ namespace HarmonyXInterop
                     return wrapped;
             }
 
-            using var dmd = new DynamicMethodDefinition($"TranspilerWrapper_`{transpiler.GetID()}`",
+            using (var dmd = new DynamicMethodDefinition($"TranspilerWrapper_`{transpiler.GetID()}`",
                 typeof(IEnumerable<CodeInstruction>), new[]
                 {
                     typeof(IEnumerable<CodeInstruction>),
                     typeof(ILGenerator),
                     typeof(MethodBase)
-                });
-
-            var il = dmd.GetILGenerator();
-            il.Emit(OpCodes.Ldtoken, transpiler);
-            il.Emit(OpCodes.Call, ResolveToken);
-            il.Emit(OpCodes.Castclass, typeof(MethodInfo));
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldarg_2);
-            il.Emit(OpCodes.Call, ApplyTranspilerMethod);
-            il.Emit(OpCodes.Ret);
-
-            var generatedWrapper = dmd.GenerateWith<DMDCecilGenerator>();
-
-            lock (Wrappers)
+                }))
             {
-                Wrappers[transpiler] = generatedWrapper;
-            }
+                var il = dmd.GetILGenerator();
+                il.Emit(OpCodes.Ldtoken, transpiler);
+                il.Emit(OpCodes.Call, ResolveToken);
+                il.Emit(OpCodes.Castclass, typeof(MethodInfo));
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldarg_2);
+                il.Emit(OpCodes.Call, ApplyTranspilerMethod);
+                il.Emit(OpCodes.Ret);
 
-            return generatedWrapper;
+                var generatedWrapper = dmd.GenerateWith<DMDCecilGenerator>();
+
+                lock (Wrappers)
+                {
+                    Wrappers[transpiler] = generatedWrapper;
+                }
+
+                return generatedWrapper;
+            }
         }
 
         private static IEnumerable<CodeInstruction> ApplyTranspiler(MethodInfo transpiler,
