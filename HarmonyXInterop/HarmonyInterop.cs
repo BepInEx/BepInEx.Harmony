@@ -9,46 +9,15 @@ using Mono.Cecil;
 
 namespace HarmonyXInterop
 {
-    public class PatchInfoWrapper
-    {
-        public PatchMethod[] prefixes;
-        public PatchMethod[] postfixes;
-        public PatchMethod[] transpilers;
-        public PatchMethod[] finalizers;
-    }
-
-    public class PatchMethod
-    {
-        public string owner;
-
-        public MethodInfo method; // need to be called 'method'
-
-        /// <summary>Priority</summary>
-        public int priority = -1;
-
-        /// <summary>Before parameter</summary>
-        public string[] before;
-
-        /// <summary>After parameter</summary>
-        public string[] after;
-
-        public HarmonyMethod ToHarmonyMethod(out string patchOwner)
-        {
-            patchOwner = owner;
-            return new HarmonyMethod
-            {
-                after = after,
-                before = before,
-                method = method,
-                priority = priority,
-            };
-        }
-    }
-
     public static class HarmonyInterop
     {
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
         private static readonly Dictionary<Version, Assembly> AssemblyCache = new Dictionary<Version, Assembly>();
+
+        private static readonly Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
+            AccessTools.MethodDelegate<Func<MethodBase, PatchInfo, MethodInfo>>(
+                AccessTools.Method(typeof(HarmonyManipulator).Assembly.GetType("HarmonyLib.PatchFunctions"),
+                    "UpdateWrapper"));
 
         public static void Initialize()
         {
@@ -81,7 +50,7 @@ namespace HarmonyXInterop
         // In some cases interop lib name is not 0Harmony (e.g. build purposes)
         // In this case we normalize assembly names so that they are always resolved
         // properly
-        private static byte[] FixupHarmonyAssemlbyName(string path)
+        private static byte[] FixupHarmonyAssemblyName(string path)
         {
             using var ms = new MemoryStream();
             using var ad = AssemblyDefinition.ReadAssembly(path);
@@ -90,7 +59,7 @@ namespace HarmonyXInterop
             ad.Write(ms);
             return ms.ToArray();
         }
-        
+
         private static Assembly ResolveHarmonyDependency(object sender, ResolveEventArgs args)
         {
             if (!TryParseAssemblyName(args.Name, out var name))
@@ -108,7 +77,7 @@ namespace HarmonyXInterop
 
             try
             {
-                assembly = Assembly.Load(FixupHarmonyAssemlbyName(assToLoad.Value));
+                assembly = Assembly.Load(FixupHarmonyAssemblyName(assToLoad.Value));
                 AssemblyCache[assToLoad.Key] = assembly;
                 return assembly;
             }
@@ -117,11 +86,6 @@ namespace HarmonyXInterop
                 return null;
             }
         }
-
-        private static Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
-            AccessTools.MethodDelegate<Func<MethodBase, PatchInfo, MethodInfo>>(
-                AccessTools.Method(typeof(HarmonyManipulator).Assembly.GetType("HarmonyLib.PatchFunctions"),
-                    "UpdateWrapper"));
 
         public static void ApplyPatch(MethodBase target, PatchInfoWrapper info)
         {

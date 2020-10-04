@@ -69,6 +69,7 @@
     <ItemGroup>
         <Compile Include="DMDUtil.cs" />
         <Compile Include="HarmonyInterop.cs" />
+        <Compile Include="PatchModel.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TranspilerInterop.cs" />
     </ItemGroup>
