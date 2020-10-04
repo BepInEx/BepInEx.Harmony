@@ -69,6 +69,7 @@
     <ItemGroup>
         <Compile Include="HarmonyInterop.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="TranspilerInterop.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
