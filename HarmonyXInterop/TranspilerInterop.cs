@@ -57,10 +57,9 @@ namespace HarmonyXInterop
 
 		private static readonly MethodInfo ResolveToken = AccessTools.Method(typeof(MethodBase), nameof(MethodBase.GetMethodFromHandle), new []{ typeof(RuntimeMethodHandle) });
 		private static readonly MethodInfo ApplyTranspilerMethod = AccessTools.Method(typeof(TranspilerInterop), nameof(ApplyTranspiler));
-		
+
 		public static MethodInfo WrapInterop(MethodInfo transpiler)
 		{
-			Environment.SetEnvironmentVariable("MONOMOD_DMD_TYPE", "cecil");
 			lock (Wrappers)
 				if (Wrappers.TryGetValue(transpiler, out var wrapped))
 					return wrapped;	
@@ -82,10 +81,8 @@ namespace HarmonyXInterop
 			il.Emit(OpCodes.Call, ApplyTranspilerMethod);
 			il.Emit(OpCodes.Ret);
 
-			var generatedWrapper = dmd.Generate();
+			var generatedWrapper = dmd.GenerateWith<DMDCecilGenerator>();
 			
-			Environment.SetEnvironmentVariable("MONOMOD_DMD_TYPE", null);
-
 			lock (Wrappers)
 				Wrappers[transpiler] = generatedWrapper;
 
