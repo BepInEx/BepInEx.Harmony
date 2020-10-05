@@ -128,7 +128,9 @@ namespace HarmonyLib.Tools
         /// <summary>
         /// Event fired on any incoming message that passes the channel filter.
         /// </summary>
+#pragma warning disable 67
         public static event EventHandler<LogEventArgs> MessageReceived;
+#pragma warning restore 67
 
         internal static void Log(LogChannel channel, Func<string> message)
         {
