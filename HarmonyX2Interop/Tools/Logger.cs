@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using HarmonyXInterop;
 
 namespace HarmonyLib.Tools
 {
@@ -131,14 +132,12 @@ namespace HarmonyLib.Tools
 
         internal static void Log(LogChannel channel, Func<string> message)
         {
-            if ((channel & ChannelFilter) != LogChannel.None)
-                MessageReceived?.Invoke(null, new LogEventArgs { LogChannel = channel, Message = message() });
+            HarmonyInterop.Log((int) channel, message);
         }
 
         internal static void LogText(LogChannel channel, string message)
         {
-            if ((channel & ChannelFilter) != LogChannel.None)
-                MessageReceived?.Invoke(null, new LogEventArgs { LogChannel = channel, Message = message });
+            HarmonyInterop.LogText((int) channel, message);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using HarmonyLib.Public.Patching;
+using HarmonyLib.Tools;
 using Mono.Cecil;
 
 namespace HarmonyXInterop
@@ -19,6 +20,24 @@ namespace HarmonyXInterop
                 AccessTools.Method(typeof(HarmonyManipulator).Assembly.GetType("HarmonyLib.PatchFunctions"),
                     "UpdateWrapper"));
 
+        private static readonly Action<Logger.LogChannel, Func<string>> HarmonyLog =
+            AccessTools.MethodDelegate<Action<Logger.LogChannel, Func<string>>>(AccessTools.Method(typeof(Logger),
+                "Log"));
+
+        private static readonly Action<Logger.LogChannel, string> HarmonyLogText =
+            AccessTools.MethodDelegate<Action<Logger.LogChannel, string>>(AccessTools.Method(typeof(Logger),
+                "LogText"));
+
+        public static void Log(int channel, Func<string> message)
+        {
+            HarmonyLog((Logger.LogChannel) channel, message);
+        }
+        
+        public static void LogText(int channel, string message)
+        {
+            HarmonyLogText((Logger.LogChannel) channel, message);
+        }
+        
         public static void Initialize()
         {
             var curDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
