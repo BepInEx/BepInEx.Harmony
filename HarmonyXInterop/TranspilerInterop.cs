@@ -72,7 +72,7 @@ namespace HarmonyXInterop
                     return wrapped;
             }
 
-            using (var dmd = new DynamicMethodDefinition($"TranspilerWrapper_`{transpiler.GetID()}`",
+            using (var dmd = new DynamicMethodDefinition($"TranspilerWrapper<{transpiler.GetID(simple: true)}>",
                 typeof(IEnumerable<CodeInstruction>), new[]
                 {
                     typeof(IEnumerable<CodeInstruction>),
