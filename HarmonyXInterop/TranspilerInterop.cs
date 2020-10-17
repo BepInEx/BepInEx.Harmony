@@ -307,6 +307,11 @@ namespace HarmonyXInterop
             var type = transpiler.GetParameters()
                 .Select(p => p.ParameterType)
                 .FirstOrDefault(t => IsCodeInstructionsParameter(t));
+            if (type == null)
+            {
+                unassignedValues = null;
+                return enumerable;
+            }
             if (type != typeof(IEnumerable<CodeInstruction>))
                 return ConvertInstructionsAndUnassignedValues(type, enumerable, out unassignedValues);
             unassignedValues = null;
