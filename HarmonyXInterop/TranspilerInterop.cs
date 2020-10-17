@@ -309,7 +309,8 @@ namespace HarmonyXInterop
                 .FirstOrDefault(t => IsCodeInstructionsParameter(t));
             if (type == null)
             {
-                unassignedValues = null;
+                // Create new because we need likely to convert because this interop is for HarmonyX 2.0 to 2.1
+                unassignedValues = new Dictionary<object, Dictionary<string, object>>();
                 return enumerable;
             }
             if (type != typeof(IEnumerable<CodeInstruction>))
