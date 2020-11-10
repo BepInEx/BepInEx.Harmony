@@ -13,7 +13,6 @@ namespace HarmonyXInterop
     public static class HarmonyInterop
     {
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
-        private static readonly Dictionary<Version, Assembly> AssemblyCache = new Dictionary<Version, Assembly>();
 
         private static readonly Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
             AccessTools.MethodDelegate<Func<MethodBase, PatchInfo, MethodInfo>>(
@@ -27,6 +26,9 @@ namespace HarmonyXInterop
         private static readonly Action<Logger.LogChannel, string> HarmonyLogText =
             AccessTools.MethodDelegate<Action<Logger.LogChannel, string>>(AccessTools.Method(typeof(Logger),
                 "LogText"));
+        
+        private static readonly Dictionary<string, long> shimCache = new Dictionary<string, long>();
+        private static BinaryWriter cacheWriter;
 
         public static void Log(int channel, Func<string> message)
         {
@@ -38,73 +40,82 @@ namespace HarmonyXInterop
             HarmonyLogText((Logger.LogChannel) channel, message);
         }
         
-        public static void Initialize()
+        public static void Initialize(string cachePath)
         {
+            Directory.CreateDirectory(cachePath);
+            var cacheFile = Path.Combine(cachePath, "harmony_interop_cache.dat");
             var curDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             foreach (var file in Directory.GetFiles(curDir, "0Harmony*.dll", SearchOption.AllDirectories))
             {
-                using (var ass = AssemblyDefinition.ReadAssembly(file))
-                    Assemblies.Add(ass.Name.Version, file);
+                using var ass = AssemblyDefinition.ReadAssembly(file);
+                // Don't add normal Harmony, resolve it normally
+                if (ass.Name.Name != "0harmony")
+                    Assemblies.Add(ass.Name.Version, ass.Name.Name);
             }
 
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveHarmonyDependency;
+            if (File.Exists(cacheFile))
+            {
+                try
+                {
+                    using var br = new BinaryReader(File.OpenRead(cacheFile));
+                    while (true)
+                    {
+                        var file = br.ReadString();
+                        var writeTime = br.ReadInt64();
+                        shimCache[file] = writeTime;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Skip
+                }
+            }
+
+            cacheWriter = new BinaryWriter(File.Create(cacheFile));
+            foreach (var kv in shimCache)
+            {
+                cacheWriter.Write(kv.Key);
+                cacheWriter.Write(kv.Value);
+            }
+            cacheWriter.Flush();
         }
 
-        private static bool TryParseAssemblyName(string fullName, out AssemblyName assemblyName)
+        public static void TryShim(string path, Action<string> logMessage = null, ReaderParameters readerParameters = null)
         {
+            var lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
+            if (shimCache.TryGetValue(path, out var cachedWriteTime) && cachedWriteTime == lastWriteTime)
+                return;
             try
             {
-                assemblyName = new AssemblyName(fullName);
-                return true;
+                // Read via MemoryStream to prevent sharing violation
+                // This is only a problem on the first run; the cache prevents this from happening often
+                using var ms = new MemoryStream(File.ReadAllBytes(path));
+                using var ad = AssemblyDefinition.ReadAssembly(ms, readerParameters ?? new ReaderParameters());
+                var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
+                if (harmonyRef != null)
+                {
+                    var assToLoad = Assemblies.LastOrDefault(kv => kv.Key <= harmonyRef.Version);
+                    if (assToLoad.Value != null)
+                    {
+                        logMessage?.Invoke($"Shimming {path} to use older version of Harmony ({assToLoad.Value}). Please update the plugin if possible.");
+                        harmonyRef.Name = assToLoad.Value;
+                        // Write via intermediate MemoryStream to prevent DLL corruption
+                        using var outputMs = new MemoryStream();
+                        ad.Write(outputMs);
+                        File.WriteAllBytes(path, outputMs.ToArray());
+                        lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
+                    }
+                }
+
+                shimCache[path] = lastWriteTime;
+                cacheWriter.Write(path);
+                cacheWriter.Write(lastWriteTime);
+                cacheWriter.Flush();
             }
             catch (Exception e)
             {
-                File.AppendAllText("tryparseerr.log", $"Failed to parse {fullName}: {e}");
-                assemblyName = null;
-                return false;
-            }
-        }
-
-        // In some cases interop lib name is not 0Harmony (e.g. build purposes)
-        // In this case we normalize assembly names so that they are always resolved
-        // properly
-        private static byte[] FixupHarmonyAssemblyName(string path)
-        {
-            using (var ms = new MemoryStream())
-            using (var ad = AssemblyDefinition.ReadAssembly(path))
-            {
-                ad.Name.Name = "0Harmony";
-                ad.MainModule.Name = "0Harmony.dll";
-                ad.Write(ms);
-                return ms.ToArray();
-            }
-        }
-
-        private static Assembly ResolveHarmonyDependency(object sender, ResolveEventArgs args)
-        {
-            if (!TryParseAssemblyName(args.Name, out var name))
-                return null;
-
-            if (!name.Name.StartsWith("0Harmony"))
-                return null;
-
-            var assToLoad = Assemblies.LastOrDefault(kv => kv.Key <= name.Version);
-            if (assToLoad.Value == null)
-                return null;
-
-            if (AssemblyCache.TryGetValue(assToLoad.Key, out var assembly))
-                return assembly;
-
-            try
-            {
-                assembly = Assembly.Load(FixupHarmonyAssemblyName(assToLoad.Value));
-                AssemblyCache[assToLoad.Key] = assembly;
-                return assembly;
-            }
-            catch (Exception)
-            {
-                return null;
+                logMessage?.Invoke($"Failed to shim {path}: {e}");
             }
         }
 
