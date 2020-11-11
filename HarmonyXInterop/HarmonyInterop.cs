@@ -119,7 +119,8 @@ namespace HarmonyXInterop
                         }
                         catch (IOException)
                         {
-                            // Skip possible sharing violation
+                            // Skip possible sharing violation, but in that case force to refresh the cache
+                            lastWriteTime = 0;
                         }
 
                         result = outputMs.ToArray();
