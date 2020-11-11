@@ -72,20 +72,29 @@ namespace HarmonyXInterop
                 }
             }
 
-            cacheWriter = new BinaryWriter(File.Create(cacheFile));
-            foreach (var kv in shimCache)
+            try
             {
-                cacheWriter.Write(kv.Key);
-                cacheWriter.Write(kv.Value);
+                 var cw = new BinaryWriter(File.Create(cacheFile));
+                 cacheWriter = cw;
+                 foreach (var kv in shimCache)
+                 {
+                     cacheWriter.Write(kv.Key);
+                     cacheWriter.Write(kv.Value);
+                 }
+                 cacheWriter.Flush();
             }
-            cacheWriter.Flush();
+            catch (IOException)
+            {
+                // Sharing violation can happen; in that case simply ignore writing the cache
+            }
         }
 
-        public static void TryShim(string path, Action<string> logMessage = null, ReaderParameters readerParameters = null)
+        public static byte[] TryShim(string path, Action<string> logMessage = null, ReaderParameters readerParameters = null)
         {
+            byte[] result = null;
             var lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
             if (shimCache.TryGetValue(path, out var cachedWriteTime) && cachedWriteTime == lastWriteTime)
-                return;
+                return result;
             try
             {
                 // Read via MemoryStream to prevent sharing violation
@@ -103,20 +112,34 @@ namespace HarmonyXInterop
                         // Write via intermediate MemoryStream to prevent DLL corruption
                         using var outputMs = new MemoryStream();
                         ad.Write(outputMs);
-                        File.WriteAllBytes(path, outputMs.ToArray());
-                        lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
+                        try
+                        {
+                            File.WriteAllBytes(path, outputMs.ToArray());
+                            lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
+                        }
+                        catch (IOException)
+                        {
+                            // Skip possible sharing violation
+                        }
+
+                        result = outputMs.ToArray();
                     }
                 }
 
                 shimCache[path] = lastWriteTime;
-                cacheWriter.Write(path);
-                cacheWriter.Write(lastWriteTime);
-                cacheWriter.Flush();
+                if (cacheWriter != null)
+                {
+                    cacheWriter.Write(path);
+                    cacheWriter.Write(lastWriteTime);
+                    cacheWriter.Flush();    
+                }
             }
             catch (Exception e)
             {
                 logMessage?.Invoke($"Failed to shim {path}: {e}");
             }
+
+            return result;
         }
 
         public static void ApplyPatch(MethodBase target, PatchInfoWrapper info)
