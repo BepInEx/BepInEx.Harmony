@@ -6,7 +6,7 @@ namespace BepInEx.Harmony
 	/// Specifies the indices of parameters that are ByRef.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
-	[Obsolete("Use HarmonyLib.ParameterByRefAttribute directly")]
+	[Obsolete("Use HarmonyLib.ParameterByRefAttribute directly", true)]
 	public class ParameterByRefAttribute : HarmonyLib.ParameterByRefAttribute
 	{
 		/// <summary>
