@@ -12,6 +12,8 @@ namespace HarmonyXInterop
 {
     public static class HarmonyInterop
     {
+        private const string BACKUP_PATH = "BepInEx_Shim_Backup";
+        
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
 
         private static readonly Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
@@ -89,7 +91,7 @@ namespace HarmonyXInterop
             }
         }
 
-        public static byte[] TryShim(string path, Action<string> logMessage = null, ReaderParameters readerParameters = null)
+        public static byte[] TryShim(string path, string gameRootDirectory, Action<string> logMessage = null, ReaderParameters readerParameters = null)
         {
             byte[] result = null;
             var lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
@@ -99,7 +101,8 @@ namespace HarmonyXInterop
             {
                 // Read via MemoryStream to prevent sharing violation
                 // This is only a problem on the first run; the cache prevents this from happening often
-                using var ms = new MemoryStream(File.ReadAllBytes(path));
+                var origBytes = File.ReadAllBytes(path);
+                using var ms = new MemoryStream(origBytes);
                 using var ad = AssemblyDefinition.ReadAssembly(ms, readerParameters ?? new ReaderParameters());
                 var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
                 if (harmonyRef != null)
@@ -114,6 +117,12 @@ namespace HarmonyXInterop
                         ad.Write(outputMs);
                         try
                         {
+                            var backupPath = Path.Combine(gameRootDirectory, BACKUP_PATH);
+                            var midPath = Path.GetDirectoryName(Path.GetFullPath(path).Substring(gameRootDirectory.Length + 1));
+                            var backupDir = Path.Combine(backupPath, midPath);
+                            Directory.CreateDirectory(backupDir);
+                            File.WriteAllBytes(Path.Combine(backupDir, Path.GetFileName(path)), origBytes);
+                            
                             File.WriteAllBytes(path, outputMs.ToArray());
                             lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
                         }
