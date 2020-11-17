@@ -152,36 +152,37 @@ namespace HarmonyXInterop
             return result;
         }
 
-        public static void ApplyPatch(MethodBase target, PatchInfoWrapper info)
+        public static void ApplyPatch(MethodBase target, PatchInfoWrapper add, PatchInfoWrapper remove)
         {
+            static PatchMethod[] WrapTranspilers(PatchMethod[] transpilers) => transpilers.Select(p => new PatchMethod
+            {
+                after = p.after,
+                before = p.before,
+                method = TranspilerInterop.WrapInterop(p.method),
+                owner = p.owner,
+                priority = p.priority
+            }).ToArray();
+            
             var pInfo = target.ToPatchInfo();
             lock (pInfo)
             {
-                pInfo.prefixes = Sync(info.prefixes, pInfo.prefixes);
-                pInfo.postfixes = Sync(info.postfixes, pInfo.postfixes);
-                pInfo.transpilers = Sync(info.transpilers.Select(p => new PatchMethod
-                {
-                    after = p.after,
-                    before = p.before,
-                    method = TranspilerInterop.WrapInterop(p.method),
-                    owner = p.owner,
-                    priority = p.priority
-                }).ToArray(), pInfo.transpilers);
-                pInfo.finalizers = Sync(info.finalizers, pInfo.finalizers);
+                pInfo.prefixes = Sync(add.prefixes, remove.prefixes, pInfo.prefixes);
+                pInfo.postfixes = Sync(add.postfixes, remove.postfixes, pInfo.postfixes);
+                pInfo.transpilers = Sync(WrapTranspilers(add.transpilers), WrapTranspilers(remove.transpilers), pInfo.transpilers);
+                pInfo.finalizers = Sync(add.finalizers, remove.finalizers, pInfo.finalizers);
             }
 
             UpdateWrapper(target, pInfo);
         }
 
-        private static Patch[] Sync(PatchMethod[] add, Patch[] current)
+        private static Patch[] Sync(PatchMethod[] add, PatchMethod[] remove, Patch[] current)
         {
-            if (add.Length == 0)
+            if (add.Length == 0 && remove.Length == 0)
                 return current;
-            var toRemove = new HashSet<MethodInfo>(add.Select(a => a.method));
-            current = current.Where(p => !toRemove.Contains(p.PatchMethod)).ToArray();
+            current = current.Where(p => !remove.Any(r => r.method == p.PatchMethod && r.owner == p.owner)).ToArray();
             var initialIndex = current.Length;
             return current.Concat(add.Where(method => method != null).Select((method, i) =>
-                new Patch(method.ToHarmonyMethod(out var owner), i + initialIndex, owner))).ToArray();
+                new Patch(method.ToHarmonyMethod(), i + initialIndex, method.owner))).ToArray();
         }
     }
 }

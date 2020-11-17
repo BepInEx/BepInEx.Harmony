@@ -10,6 +10,13 @@ namespace HarmonyLib.Internal
     internal class MethodPatcher
     {
         private MethodBase mb;
+        private PatchInfoWrapper previousState = new PatchInfoWrapper
+        {
+            prefixes = new PatchMethod[0],
+            postfixes = new PatchMethod[0],
+            transpilers = new PatchMethod[0],
+            finalizers = new PatchMethod[0]
+        };
         
         public void Apply()
         {
@@ -26,13 +33,29 @@ namespace HarmonyLib.Internal
             }
             
             var info = mb.ToPatchInfo();
-            HarmonyInterop.ApplyPatch(mb, new PatchInfoWrapper
+            var state = new PatchInfoWrapper
             {
                 prefixes = ToPatchMethod(info.prefixes),
                 postfixes = ToPatchMethod(info.postfixes),
                 transpilers = ToPatchMethod(info.transpilers),
                 finalizers = ToPatchMethod(info.finalizers),
-            });
+            };
+
+            static void Diff(PatchMethod[] last, PatchMethod[] curr, out PatchMethod[] add, out PatchMethod[] remove)
+            {
+                add = curr.Except(last, PatchMethodComparer.Instance).ToArray();
+                remove = last.Except(curr, PatchMethodComparer.Instance).ToArray();
+            }
+            
+            var add = new PatchInfoWrapper();
+            var remove = new PatchInfoWrapper();
+            
+            Diff(previousState.prefixes, state.prefixes, out add.prefixes, out remove.prefixes);
+            Diff(previousState.postfixes, state.postfixes, out add.postfixes, out remove.postfixes);
+            Diff(previousState.transpilers, state.transpilers, out add.transpilers, out remove.transpilers);
+            Diff(previousState.finalizers, state.finalizers, out add.finalizers, out remove.finalizers);
+            
+            HarmonyInterop.ApplyPatch(mb, add, remove);
         }
         
         public static MethodPatcher Create(MethodBase target)
