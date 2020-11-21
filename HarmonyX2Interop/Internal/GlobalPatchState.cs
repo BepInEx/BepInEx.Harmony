@@ -54,6 +54,8 @@ namespace HarmonyLib.Internal
             Diff(previousState.postfixes, state.postfixes, out add.postfixes, out remove.postfixes);
             Diff(previousState.transpilers, state.transpilers, out add.transpilers, out remove.transpilers);
             Diff(previousState.finalizers, state.finalizers, out add.finalizers, out remove.finalizers);
+
+            previousState = state;
             
             HarmonyInterop.ApplyPatch(mb, add, remove);
         }
