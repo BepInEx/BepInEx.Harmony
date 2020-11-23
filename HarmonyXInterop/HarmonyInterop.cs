@@ -93,10 +93,20 @@ namespace HarmonyXInterop
 
         public static byte[] TryShim(string path, string gameRootDirectory, Action<string> logMessage = null, ReaderParameters readerParameters = null)
         {
+            try
+            {
+                if (!File.Exists(path))
+                    return null;
+            }
+            catch (Exception e)
+            {
+                logMessage?.Invoke($"Failed to read path {path}: {e}");
+                return null;
+            }
             byte[] result = null;
             var lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
             if (shimCache.TryGetValue(path, out var cachedWriteTime) && cachedWriteTime == lastWriteTime)
-                return result;
+                return null;
             try
             {
                 // Read via MemoryStream to prevent sharing violation
