@@ -126,7 +126,9 @@ namespace HarmonyXInterop
                 var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
                 if (harmonyRef != null)
                 {
-                    var assToLoad = Assemblies.LastOrDefault(kv => kv.Key <= harmonyRef.Version);
+                    static bool VersionMatches(Version a, Version b) =>
+                        a.Major == b.Major && a.Minor == b.Minor && a <= b;
+                    var assToLoad = Assemblies.LastOrDefault(kv => VersionMatches(kv.Key, harmonyRef.Version));
                     if (assToLoad.Value != null)
                     {
                         logMessage?.Invoke($"Shimming {path} to use older version of Harmony ({assToLoad.Value}). Please update the plugin if possible.");
