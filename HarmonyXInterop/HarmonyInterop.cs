@@ -52,7 +52,7 @@ namespace HarmonyXInterop
             {
                 using var ass = AssemblyDefinition.ReadAssembly(file);
                 // Don't add normal Harmony, resolve it normally
-                if (ass.Name.Name != "0harmony")
+                if (ass.Name.Name != "0Harmony")
                     Assemblies.Add(ass.Name.Version, ass.Name.Name);
             }
 
