@@ -111,7 +111,16 @@ namespace HarmonyXInterop
             {
                 // Read via MemoryStream to prevent sharing violation
                 // This is only a problem on the first run; the cache prevents this from happening often
-                var origBytes = File.ReadAllBytes(path);
+                byte[] origBytes;
+                try
+                {
+                    origBytes = File.ReadAllBytes(path);
+                }
+                catch (Exception)
+                {
+                    // Invalid file, skip shimming it
+                    return null;
+                }
                 using var ms = new MemoryStream(origBytes);
                 using var ad = AssemblyDefinition.ReadAssembly(ms, readerParameters ?? new ReaderParameters());
                 var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
