@@ -93,22 +93,49 @@ namespace HarmonyXInterop
 
         public static byte[] TryShim(string path, string gameRootDirectory, Action<string> logMessage = null, ReaderParameters readerParameters = null)
         {
+            var pathsToShim = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            var result = TryShimInternal(path, gameRootDirectory, logMessage, readerParameters, out var deps);
+            foreach (string dep in deps)
+                pathsToShim.Add(dep);
+
+            while (pathsToShim.Count != 0)
+            {
+                var depPath = pathsToShim.First();
+                TryShimInternal(depPath, gameRootDirectory, logMessage, readerParameters, out deps);
+                foreach (string dep in deps)
+                    pathsToShim.Add(dep);
+                pathsToShim.Remove(depPath);
+            }
+
+            return result;
+        }
+
+        private static bool NeedsShimming(string path, out long lastWriteTime, Action<string> logMessage = null)
+        {
+            lastWriteTime = 0;
             try
             {
                 if (!File.Exists(path))
-                    return null;
+                    return false;
             }
             catch (Exception e)
             {
                 logMessage?.Invoke($"Failed to read path {path}: {e}");
-                return null;
+                return false;
             }
-            byte[] result = null;
-            var lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
-            if (shimCache.TryGetValue(path, out var cachedWriteTime) && cachedWriteTime == lastWriteTime)
+            lastWriteTime = File.GetLastWriteTimeUtc(path).Ticks;
+            return !shimCache.TryGetValue(path, out var cachedWriteTime) || cachedWriteTime != lastWriteTime;
+        }
+        
+        private static byte[] TryShimInternal(string path, string gameRootDirectory, Action<string> logMessage, ReaderParameters readerParameters, out List<string> deps)
+        {
+            deps = new List<string>();
+            if (!NeedsShimming(path, out var lastWriteTime, logMessage))
                 return null;
+            byte[] result = null;
             try
             {
+                var dir = Path.GetDirectoryName(path);
                 // Read via MemoryStream to prevent sharing violation
                 // This is only a problem on the first run; the cache prevents this from happening often
                 byte[] origBytes;
@@ -123,6 +150,12 @@ namespace HarmonyXInterop
                 }
                 using var ms = new MemoryStream(origBytes);
                 using var ad = AssemblyDefinition.ReadAssembly(ms, readerParameters ?? new ReaderParameters());
+
+                // Register direct deps that can be instantly resolved
+                deps.AddRange(ad.MainModule.AssemblyReferences
+                                .Select(a => Path.Combine(dir, $"{a.Name}.dll"))
+                                .Where(p => NeedsShimming(p, out _, logMessage)));
+
                 var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
                 if (harmonyRef != null)
                 {
