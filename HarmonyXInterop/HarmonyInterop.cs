@@ -15,6 +15,7 @@ namespace HarmonyXInterop
         private const string BACKUP_PATH = "BepInEx_Shim_Backup";
         
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
+        private static readonly HashSet<string> InteropAssemblyNames = new HashSet<string>();
 
         private static readonly Func<MethodBase, PatchInfo, MethodInfo> UpdateWrapper =
             AccessTools.MethodDelegate<Func<MethodBase, PatchInfo, MethodInfo>>(
@@ -53,7 +54,10 @@ namespace HarmonyXInterop
                 using var ass = AssemblyDefinition.ReadAssembly(file);
                 // Don't add normal Harmony, resolve it normally
                 if (ass.Name.Name != "0Harmony")
+                {
                     Assemblies.Add(ass.Name.Version, ass.Name.Name);
+                    InteropAssemblyNames.Add(ass.Name.Name);
+                }
             }
 
             if (File.Exists(cacheFile))
@@ -156,7 +160,7 @@ namespace HarmonyXInterop
                                 .Select(a => Path.Combine(dir, $"{a.Name}.dll"))
                                 .Where(p => NeedsShimming(p, out _, logMessage)));
 
-                var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name == "0Harmony");
+                var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name.StartsWith("0Harmony") && !InteropAssemblyNames.Contains(a.Name));
                 if (harmonyRef != null)
                 {
                     static bool VersionMatches(Version a, Version b) =>
