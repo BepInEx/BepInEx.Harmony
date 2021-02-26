@@ -13,7 +13,8 @@ namespace HarmonyXInterop
     public static class HarmonyInterop
     {
         private const string BACKUP_PATH = "BepInEx_Shim_Backup";
-        
+
+        private static Version maxAvailableShimVersion;
         private static readonly SortedDictionary<Version, string> Assemblies = new SortedDictionary<Version, string>();
         private static readonly HashSet<string> InteropAssemblyNames = new HashSet<string>();
 
@@ -59,6 +60,8 @@ namespace HarmonyXInterop
                     InteropAssemblyNames.Add(ass.Name.Name);
                 }
             }
+
+            maxAvailableShimVersion = Assemblies.LastOrDefault().Key;
 
             if (File.Exists(cacheFile))
             {
@@ -163,8 +166,9 @@ namespace HarmonyXInterop
                 var harmonyRef = ad.MainModule.AssemblyReferences.FirstOrDefault(a => a.Name.StartsWith("0Harmony") && !InteropAssemblyNames.Contains(a.Name));
                 if (harmonyRef != null)
                 {
-                    static bool VersionMatches(Version a, Version b) =>
-                        a.Major == b.Major && a.Minor == b.Minor && a <= b;
+                    static bool VersionMatches(Version cmpV, Version refV) =>
+                        maxAvailableShimVersion != null && refV <= maxAvailableShimVersion &&
+                        cmpV.Major == refV.Major && cmpV.Minor == refV.Minor && cmpV <= refV;
                     var assToLoad = Assemblies.LastOrDefault(kv => VersionMatches(kv.Key, harmonyRef.Version));
                     if (assToLoad.Value != null)
                     {
