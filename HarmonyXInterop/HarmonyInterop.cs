@@ -23,12 +23,12 @@ namespace HarmonyXInterop
                 AccessTools.Method(typeof(HarmonyManipulator).Assembly.GetType("HarmonyLib.PatchFunctions"),
                     "UpdateWrapper"));
 
-        private static readonly Action<Logger.LogChannel, Func<string>> HarmonyLog =
-            AccessTools.MethodDelegate<Action<Logger.LogChannel, Func<string>>>(AccessTools.Method(typeof(Logger),
+        private static readonly Action<Logger.LogChannel, Func<string>, bool> HarmonyLog =
+            AccessTools.MethodDelegate<Action<Logger.LogChannel, Func<string>, bool>>(AccessTools.Method(typeof(Logger),
                 "Log"));
 
-        private static readonly Action<Logger.LogChannel, string> HarmonyLogText =
-            AccessTools.MethodDelegate<Action<Logger.LogChannel, string>>(AccessTools.Method(typeof(Logger),
+        private static readonly Action<Logger.LogChannel, string, bool> HarmonyLogText =
+            AccessTools.MethodDelegate<Action<Logger.LogChannel, string, bool>>(AccessTools.Method(typeof(Logger),
                 "LogText"));
         
         private static readonly Dictionary<string, long> shimCache = new Dictionary<string, long>();
@@ -36,12 +36,12 @@ namespace HarmonyXInterop
 
         public static void Log(int channel, Func<string> message)
         {
-            HarmonyLog((Logger.LogChannel) channel, message);
+            HarmonyLog((Logger.LogChannel) channel, message, false);
         }
         
         public static void LogText(int channel, string message)
         {
-            HarmonyLogText((Logger.LogChannel) channel, message);
+            HarmonyLogText((Logger.LogChannel) channel, message, false);
         }
         
         public static void Initialize(string cachePath)
