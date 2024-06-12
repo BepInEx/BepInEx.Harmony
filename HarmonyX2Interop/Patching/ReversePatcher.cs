@@ -29,10 +29,7 @@ namespace HarmonyLib
             this.instance = instance;
             this.original = original;
             this.standin = standin;
-            ilHook = new ILHook(standin, ApplyReversePatch, new ILHookConfig
-            {
-                ManualApply = true
-            });
+            ilHook = new ILHook(standin, ApplyReversePatch, false);
         }
 
         private void ApplyReversePatch(ILContext ctx)
