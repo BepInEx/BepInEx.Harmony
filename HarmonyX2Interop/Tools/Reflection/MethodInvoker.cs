@@ -1,3 +1,5 @@
+extern alias hx;
+
 using System.Reflection;
 using System.Reflection.Emit;
 using MonoMod.Utils;
@@ -56,8 +58,7 @@ namespace HarmonyLib
         /// <returns>The fast invocation handler</returns>
         public FastInvokeHandler Handler(MethodInfo methodInfo, Module module)
         {
-            var result = methodInfo.GetFastDelegate(directBoxValueAccess);
-            return (target, parameters) => result(target, parameters);
+			return new FastInvokeHandler(hx::HarmonyLib.MethodInvoker.GetHandler(methodInfo, directBoxValueAccess));
         }
 
         /// <summary>Creates a fast invocation handler from a method and a module</summary>
